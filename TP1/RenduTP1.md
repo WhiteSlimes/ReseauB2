@@ -1,6 +1,6 @@
-#TP 1 : Back to basics
+# TP 1 : Back to basics
 
-#Sommaire
+# Sommaire
 
 * [I. Gather informations](#i-gather-informations)
 * [II. Edit configurtion](#ii-edit-configuration)
