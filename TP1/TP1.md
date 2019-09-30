@@ -121,3 +121,160 @@ nameserver 10.33.10.20
 nameserver 10.33.10.2
 nameserver 8.8.8.8
 ```
+J'installe **bind-utils** avec la commande `yum install bind-utils` puis je fais la requête vers `www.reddit.com` grâce à la commande : `dig www.reddit.com`
+```
+[root@localhost admin]# dig www.reddit.com
+
+; <<>> DiG 9.11.4-P2-RedHat-9.11.4-17.P2.el8_0.1 <<>> www.reddit.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 7288
+;; flags: qr rd ra; QUERY: 1, ANSWER: 5, AUTHORITY: 13, ADDITIONAL: 27
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;www.reddit.com.                        IN      A
+
+;; ANSWER SECTION:
+www.reddit.com.         16      IN      CNAME   reddit.map.fastly.net.
+reddit.map.fastly.net.  29      IN      A       151.101.65.140
+reddit.map.fastly.net.  29      IN      A       151.101.193.140
+reddit.map.fastly.net.  29      IN      A       151.101.129.140
+reddit.map.fastly.net.  29      IN      A       151.101.1.140
+
+;; AUTHORITY SECTION:
+net.                    164437  IN      NS      a.gtld-servers.net.
+net.                    164437  IN      NS      d.gtld-servers.net.
+net.                    164437  IN      NS      m.gtld-servers.net.
+net.                    164437  IN      NS      e.gtld-servers.net.
+net.                    164437  IN      NS      k.gtld-servers.net.
+net.                    164437  IN      NS      b.gtld-servers.net.
+net.                    164437  IN      NS      g.gtld-servers.net.
+net.                    164437  IN      NS      j.gtld-servers.net.
+net.                    164437  IN      NS      i.gtld-servers.net.
+net.                    164437  IN      NS      h.gtld-servers.net.
+net.                    164437  IN      NS      l.gtld-servers.net.
+net.                    164437  IN      NS      c.gtld-servers.net.
+net.                    164437  IN      NS      f.gtld-servers.net.
+
+;; ADDITIONAL SECTION:
+a.gtld-servers.net.     164437  IN      A       192.5.6.30
+a.gtld-servers.net.     164437  IN      AAAA    2001:503:a83e::2:30
+b.gtld-servers.net.     164437  IN      A       192.33.14.30
+b.gtld-servers.net.     164437  IN      AAAA    2001:503:231d::2:30
+c.gtld-servers.net.     164437  IN      A       192.26.92.30
+c.gtld-servers.net.     164437  IN      AAAA    2001:503:83eb::30
+d.gtld-servers.net.     164437  IN      A       192.31.80.30
+d.gtld-servers.net.     164437  IN      AAAA    2001:500:856e::30
+e.gtld-servers.net.     164437  IN      A       192.12.94.30
+e.gtld-servers.net.     164437  IN      AAAA    2001:502:1ca1::30
+f.gtld-servers.net.     164437  IN      A       192.35.51.30
+f.gtld-servers.net.     164437  IN      AAAA    2001:503:d414::30
+g.gtld-servers.net.     164437  IN      A       192.42.93.30
+g.gtld-servers.net.     164437  IN      AAAA    2001:503:eea3::30
+h.gtld-servers.net.     164437  IN      A       192.54.112.30
+h.gtld-servers.net.     164437  IN      AAAA    2001:502:8cc::30
+i.gtld-servers.net.     164437  IN      A       192.43.172.30
+i.gtld-servers.net.     164437  IN      AAAA    2001:503:39c1::30
+j.gtld-servers.net.     164437  IN      A       192.48.79.30
+j.gtld-servers.net.     164437  IN      AAAA    2001:502:7094::30
+k.gtld-servers.net.     164437  IN      A       192.52.178.30
+k.gtld-servers.net.     164437  IN      AAAA    2001:503:d2d::30
+l.gtld-servers.net.     164437  IN      A       192.41.162.30
+l.gtld-servers.net.     164437  IN      AAAA    2001:500:d937::30
+m.gtld-servers.net.     164437  IN      A       192.55.83.30
+m.gtld-servers.net.     164437  IN      AAAA    2001:501:b1f9::30
+
+;; Query time: 78 msec
+;; SERVER: 10.33.10.20#53(10.33.10.20)
+;; WHEN: Mon Sep 30 14:10:18 CEST 2019
+;; MSG SIZE  rcvd: 935
+```
+Il utilise le Server en **10.33.10.20** ce qui est correcte.
+
+🌞 Pour afficher l'état actuel du **firewall** on rentre la commande `systemctl status firewalld` qui nous retourne :
+```
+[root@localhost admin]# systemctl status firewalld
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2019-09-30 14:02:18 CEST; 15min ago
+     Docs: man:firewalld(1)
+ Main PID: 737 (firewalld)
+    Tasks: 2 (limit: 5062)
+   Memory: 33.9M
+   CGroup: /system.slice/firewalld.service
+           └─737 /usr/libexec/platform-python -s /usr/sbin/firewalld --nofork --nopid
+
+Sep 30 14:02:16 localhost.localdomain systemd[1]: Starting firewalld - dynamic firewall daemon...
+Sep 30 14:02:18 localhost.localdomain systemd[1]: Started firewalld - dynamic firewall daemon.
+```
+Pour afficher les interfaces filtrer on entre la commande `firewall-cmd --list-interfaces` et qui retourne la liste des interfaces comme-ci dessous :
+```
+[root@localhost admin]# firewall-cmd --list-interfaces
+enp0s3 enp0s8
+```
+
+# II. Edit Configuration
+ 1. Configuration cartes réseau
+ On commence par définir une adresse IP statique toute neuve avec : `sudo vim /etc/sysconfig/network-scripts/ifcfg-enp0s8` et on modifie le **BOOTPROTO** en **static** et on définit une **adresse ip static** :
+ ```
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s8
+DEVICE=enp0s8
+UUID=6aecd646-fccc-3945-9877-2d19731ca4c8
+ONBOOT=yes
+
+
+IPADDR=192.168.2.89
+NETMASK=255.255.255.0
+```
+On refresh : `sudo ifdown enp0s8` et `sudo ifup enp0s8`
+
+J'ai créer une nouvelle interface **Host Only** qui porte l'adresse ip : `192.168.157.1`
+
+Voici la config de la nouvelle carte réseau :
+```
+TYPE=Ethernet
+BOOTPROTO=static
+
+IPADDR=192.168.157.89
+NETMASK=255.255.255.0
+ONBOOT=yes
+```
+**Les nouvelles cartes IP** :
+```
+[root@localhost network-scripts]# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:67:2e:f7 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+       valid_lft 85791sec preferred_lft 85791sec
+    inet6 fe80::8dad:52af:ea13:1766/64 scope link noprefixroute
+       valid_lft forever preferred_lft forever
+3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:a0:1f:7f brd ff:ff:ff:ff:ff:ff
+    inet 192.168.2.89/24 brd 192.168.2.255 scope global noprefixroute enp0s8
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a00:27ff:fea0:1f7f/64 scope link
+       valid_lft forever preferred_lft forever
+4: enp0s9: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:09:45:8e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.157.89/24 brd 192.168.157.255 scope global noprefixroute enp0s9
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a00:27ff:fe09:458e/64 scope link
+       valid_lft forever preferred_lft forever
+```
+**Table ARP** :
+```
+[root@localhost network-scripts]# ip neigh
+192.168.2.1 dev enp0s8 lladdr 0a:00:27:00:00:13 DELAY
+10.0.2.2 dev enp0s3 lladdr 52:54:00:12:35:02 STALE
+```
+
