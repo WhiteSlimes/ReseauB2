@@ -278,3 +278,7 @@ ONBOOT=yes
 10.0.2.2 dev enp0s3 lladdr 52:54:00:12:35:02 STALE
 ```
 
+2. Serveur SSH
+On fait la commande `[root@localhost ~]# vi /etc/ssh/sshd_config`
+
+On rentre le nouveau **port** `Port 2222`
