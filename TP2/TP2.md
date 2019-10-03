@@ -28,4 +28,4 @@
   * [ToDo](#todo-4)
 
 # Intro
-0. Etapes préliminaires
+# 0. Etapes préliminaires
