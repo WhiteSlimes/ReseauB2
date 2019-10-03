@@ -28,4 +28,4 @@
   * [ToDo](#todo-4)
 
 # Intro
-# 0. Simplest setup
+# 1. Simplest setup
