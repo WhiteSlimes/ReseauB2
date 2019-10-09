@@ -29,3 +29,43 @@
 
 # Intro
 # 1. Simplest setup
+
+🌞 Mettre en place la topologie.
+Topologie
+```
++-----+        +-------+        +-----+
+| PC1 +--------+  IOU1 +--------+ PC2 |
++-----+        +-------+        +-----+
+```
+```
+PC1> ip 10.2.1.1/24
+```
+```
+PC2> ip 10.2.1.2/24
+```
+
+🌞 Faire communiquer les deux PCs
+```
+PC1> ping 10.2.1.2
+84 bytes from 10.2.1.2 icmp_seq=1 ttl=64 time=0.323 ms
+84 bytes from 10.2.1.2 icmp_seq=2 ttl=64 time=0.543 ms
+84 bytes from 10.2.1.2 icmp_seq=3 ttl=64 time=0.306 ms
+84 bytes from 10.2.1.2 icmp_seq=4 ttl=64 time=0.331 ms
+84 bytes from 10.2.1.2 icmp_seq=5 ttl=64 time=0.284 ms
+```
+```
+PC2> ping 10.2.1.1
+84 bytes from 10.2.1.1 icmp_seq=1 ttl=64 time=0.801 ms
+84 bytes from 10.2.1.1 icmp_seq=2 ttl=64 time=0.329 ms
+84 bytes from 10.2.1.1 icmp_seq=3 ttl=64 time=0.474 ms
+84 bytes from 10.2.1.1 icmp_seq=4 ttl=64 time=0.287 ms
+84 bytes from 10.2.1.1 icmp_seq=5 ttl=64 time=0.426 ms
+```
+```
+PC1> show arp
+00:50:79:66:68:01  10.2.1.2 expires in 81 seconds
+```
+```
+PC2> show arp
+00:50:79:66:68:00  10.2.1.1 expires in 49 seconds
+```
