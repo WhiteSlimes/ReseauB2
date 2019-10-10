@@ -31,7 +31,7 @@
 # 1. Simplest setup
 
 🌞 Mettre en place la topologie.
-Topologie
+* Topologie
 ```
 +-----+        +-------+        +-----+
 | PC1 +--------+  IOU1 +--------+ PC2 |
