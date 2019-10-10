@@ -79,7 +79,7 @@ PC2> show arp
 
 Pour les captures Wireshark j'ai lancé la capture entre le **PC1** et IOU1 et si on ping avec le **PC2** le **PC1** on a donc la capture suivante: 
 
-![alt text]()
+![alt text](https://github.com/WhiteSlimes/ReseauB2/blob/master/TP2/captures/Capture.png)
 
 # II. More switches
 
