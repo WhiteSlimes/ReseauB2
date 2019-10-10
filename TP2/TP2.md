@@ -69,3 +69,6 @@ PC1> show arp
 PC2> show arp
 00:50:79:66:68:00  10.2.1.1 expires in 49 seconds
 ```
+
+# II. More switches
+
