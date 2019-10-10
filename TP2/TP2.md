@@ -30,13 +30,20 @@
 # Intro
 # 1. Simplest setup
 
-🌞 Mettre en place la topologie.
-* Topologie
+Topologie
 ```
 +-----+        +-------+        +-----+
 | PC1 +--------+  IOU1 +--------+ PC2 |
 +-----+        +-------+        +-----+
 ```
+Plan d'adressage
+
+Machine | `net1`
+--- | ---
+`PC1` | `10.2.1.1/24`
+`PC2` | `10.2.1.2/24`
+
+🌞 Mettre en place la topologie ci-dessus.
 ```
 PC1> ip 10.2.1.1/24
 ```
@@ -71,4 +78,30 @@ PC2> show arp
 ```
 
 # II. More switches
+
+Topologie
+```
+                        +-----+
+                        | PC2 |
+                        +--+--+
+                           |
+                           |
+                       +---+---+
+                   +---+  SW2  +----+
+                   |   +-------+    |
+                   |                |
+                   |                |
++-----+        +---+---+        +---+---+        +-----+
+| PC1 +--------+  SW1  +--------+  SW3  +--------+ PC3 |
++-----+        +-------+        +-------+        +-----+
+```
+Plan d'adressage
+
+Machine | `net1`
+--- | ---
+`PC1` | `10.2.2.1/24`
+`PC2` | `10.2.2.2/24`
+`PC3` | `10.2.2.3/24`
+
+🌞 Mettre en place la topologie ci-dessus
 
