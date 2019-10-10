@@ -77,6 +77,10 @@ PC2> show arp
 00:50:79:66:68:00  10.2.1.1 expires in 49 seconds
 ```
 
+Pour les captures Wireshark j'ai lancé la capture entre le **PC1** et IOU1 et si on ping avec le **PC2** le **PC1** on a donc la capture suivante: 
+
+![alt text]()
+
 # II. More switches
 
 Topologie
