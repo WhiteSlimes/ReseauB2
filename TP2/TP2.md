@@ -30,13 +30,13 @@
 # Intro
 # 1. Simplest setup
 
-Topologie
+####Topologie
 ```
 +-----+        +-------+        +-----+
 | PC1 +--------+  IOU1 +--------+ PC2 |
 +-----+        +-------+        +-----+
 ```
-Plan d'adressage
+####Plan d'adressage
 
 Machine | `net1`
 --- | ---
@@ -83,7 +83,7 @@ Pour les captures Wireshark j'ai lancé la capture entre le **PC1** et IOU1 et s
 
 # II. More switches
 
-Topologie
+####Topologie
 ```
                         +-----+
                         | PC2 |
@@ -99,7 +99,7 @@ Topologie
 | PC1 +--------+  SW1  +--------+  SW3  +--------+ PC3 |
 +-----+        +-------+        +-------+        +-----+
 ```
-Plan d'adressage
+####Plan d'adressage
 
 Machine | `net1`
 --- | ---
@@ -108,4 +108,163 @@ Machine | `net1`
 `PC3` | `10.2.2.3/24`
 
 🌞 Mettre en place la topologie ci-dessus
+
+
+```
+PC1> ip 10.2.2.1/24
+PC2> ip 10.2.2.2/24
+PC3> ip 10.2.2.3/24
+```
+🌞 faire communiquer les trois PCs
+
+```
+PC1> ping 10.2.2.2
+84 bytes from 10.2.2.2 icmp_seq=1 ttl=64 time=0.269 ms
+84 bytes from 10.2.2.2 icmp_seq=2 ttl=64 time=0.379 ms
+84 bytes from 10.2.2.2 icmp_seq=3 ttl=64 time=0.433 ms
+84 bytes from 10.2.2.2 icmp_seq=4 ttl=64 time=0.436 ms
+84 bytes from 10.2.2.2 icmp_seq=5 ttl=64 time=0.349 ms
+
+PC1> ping 10.2.2.3
+84 bytes from 10.2.2.3 icmp_seq=1 ttl=64 time=0.307 ms
+84 bytes from 10.2.2.3 icmp_seq=2 ttl=64 time=0.391 ms
+84 bytes from 10.2.2.3 icmp_seq=3 ttl=64 time=0.407 ms
+84 bytes from 10.2.2.3 icmp_seq=4 ttl=64 time=0.380 ms
+84 bytes from 10.2.2.3 icmp_seq=5 ttl=64 time=0.415 ms
+```
+```
+PC2> ping 10.2.2.1
+84 bytes from 10.2.2.1 icmp_seq=1 ttl=64 time=0.259 ms
+84 bytes from 10.2.2.1 icmp_seq=2 ttl=64 time=0.366 ms
+84 bytes from 10.2.2.1 icmp_seq=3 ttl=64 time=0.442 ms
+84 bytes from 10.2.2.1 icmp_seq=4 ttl=64 time=0.373 ms
+84 bytes from 10.2.2.1 icmp_seq=5 ttl=64 time=0.387 ms
+
+PC2> ping 10.2.2.3
+84 bytes from 10.2.2.3 icmp_seq=1 ttl=64 time=0.385 ms
+84 bytes from 10.2.2.3 icmp_seq=2 ttl=64 time=0.539 ms
+84 bytes from 10.2.2.3 icmp_seq=3 ttl=64 time=0.516 ms
+84 bytes from 10.2.2.3 icmp_seq=4 ttl=64 time=0.583 ms
+84 bytes from 10.2.2.3 icmp_seq=5 ttl=64 time=0.466 ms
+```
+```
+PC3> ping 10.2.2.1
+84 bytes from 10.2.2.1 icmp_seq=1 ttl=64 time=0.301 ms
+84 bytes from 10.2.2.1 icmp_seq=2 ttl=64 time=0.440 ms
+84 bytes from 10.2.2.1 icmp_seq=3 ttl=64 time=0.374 ms
+84 bytes from 10.2.2.1 icmp_seq=4 ttl=64 time=0.372 ms
+84 bytes from 10.2.2.1 icmp_seq=5 ttl=64 time=0.501 ms
+
+PC3> ping 10.2.2.2
+84 bytes from 10.2.2.2 icmp_seq=1 ttl=64 time=0.514 ms
+84 bytes from 10.2.2.2 icmp_seq=2 ttl=64 time=0.513 ms
+84 bytes from 10.2.2.2 icmp_seq=3 ttl=64 time=0.567 ms
+84 bytes from 10.2.2.2 icmp_seq=4 ttl=64 time=0.502 ms
+84 bytes from 10.2.2.2 icmp_seq=5 ttl=64 time=0.514 ms
+```
+🌞 analyser la table MAC d'un switch
+
+On rentre dans la console d'un switch et on tape la commande `show mac address-table`
+
+La console nous retourne ceci :
+```
+          Mac Address Table
+-------------------------------------------
+
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+   1    0050.7966.6800    DYNAMIC     Et0/0
+   1    0050.7966.6801    DYNAMIC     Et0/1
+   1    0050.7966.6802    DYNAMIC     Et0/2
+   1    aabb.cc00.0210    DYNAMIC     Et0/1
+   1    aabb.cc00.0310    DYNAMIC     Et0/1
+   1    aabb.cc00.0320    DYNAMIC     Et0/2
+Total Mac Addresses for this criterion: 6
+```
+Les 3 premières adresse MAC sont les 3 différents switch avec les ports sur lequel ils sont connecté et les 3 dernières sont les adresses MAC des différents postes avec le ports qur lequel ils sont connecté au switch.
+
+#### Mise en évidence du Spanning Tree Protocol
+
+🌞 déterminer les informations STP
+```
+IOU1#show spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.0100
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.0100
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr
+Et0/1               Desg FWD 100       128.2    Shr
+Et0/2               Desg FWD 100       128.3    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+Et1/0               Desg FWD 100       128.5    Shr
+Et1/1               Desg FWD 100       128.6    Shr
+Et1/2               Desg FWD 100       128.7    Shr
+Et1/3               Desg FWD 100       128.8    Shr
+```
+```
+IOU2#show spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.0100
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.0200
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr
+Et0/1               Root FWD 100       128.2    Shr
+Et0/2               Desg FWD 100       128.3    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+Et1/0               Desg FWD 100       128.5    Shr
+Et1/1               Desg FWD 100       128.6    Shr
+Et1/2               Desg FWD 100       128.7    Shr
+ --More--
+```
+```
+IOU3#show spanning-tree
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.0100
+             Cost        100
+             Port        3 (Ethernet0/2)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.0300
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr
+Et0/1               Altn BLK 100       128.2    Shr
+Et0/2               Root FWD 100       128.3    Shr
+Et0/3               Desg FWD 100       128.4    Shr
+Et1/0               Desg FWD 100       128.5    Shr
+Et1/1               Desg FWD 100       128.6    Shr
+Et1/2               Desg FWD 100       128.7    Shr
+ --More--
+```
+On remarque sur la console de L'IOU1 qu'il y a une ligne supplémentaire avec écrit ``This root is a bridge``
 
