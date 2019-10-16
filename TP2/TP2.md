@@ -43,7 +43,7 @@ Machine | `net1`
 `PC1` | `10.2.1.1/24`
 `PC2` | `10.2.1.2/24`
 
-🌞 Mettre en place la topologie ci-dessus.
+🌞 Mise en place la topologie ci-dessus.
 ```
 PC1> ip 10.2.1.1/24
 ```
@@ -107,7 +107,7 @@ Machine | `net1`
 `PC2` | `10.2.2.2/24`
 `PC3` | `10.2.2.3/24`
 
-🌞 Mettre en place la topologie ci-dessus
+🌞 Mise en place la topologie ci-dessus
 
 
 ```
@@ -115,7 +115,7 @@ PC1> ip 10.2.2.1/24
 PC2> ip 10.2.2.2/24
 PC3> ip 10.2.2.3/24
 ```
-🌞 faire communiquer les trois PCs
+🌞 Faire communiquer les trois PCs
 
 ```
 PC1> ping 10.2.2.2
@@ -162,7 +162,7 @@ PC3> ping 10.2.2.2
 84 bytes from 10.2.2.2 icmp_seq=4 ttl=64 time=0.502 ms
 84 bytes from 10.2.2.2 icmp_seq=5 ttl=64 time=0.514 ms
 ```
-🌞 analyser la table MAC d'un switch
+🌞 Analyser la table MAC d'un switch
 
 On rentre dans la console d'un switch et on tape la commande `show mac address-table`
 
@@ -185,7 +185,7 @@ Les 3 premières adresse MAC sont les 3 différents switch avec les ports sur le
 
 #### Mise en évidence du Spanning Tree Protocol
 
-🌞 déterminer les informations STP
+🌞 Déterminer les informations STP
 ```
 IOU1#show spanning-tree
 
@@ -292,7 +292,7 @@ Machine | IP `net1` | VLAN
 `PC2` | `10.2.3.2/24` | 20
 `PC3` | `10.2.3.3/24` | 20
 
-Mise en place la topologie ci-dessus.
+🌞 Mise en place la topologie ci-dessus
 ```
 PC1> ip 10.2.3.1/24
 PC2> ip 10.2.3.2/24
@@ -339,7 +339,7 @@ VLAN Name                             Status    Ports
 1005 trnet-default                    act/unsup
 ```
 
-Vérifier que `PC2` ne peut joindre que `PC3`.
+🌞 Vérifier que `PC2` ne peut joindre que `PC3`.
 ```
 PC2> ping 10.2.3.3
 84 bytes from 10.2.3.3 icmp_seq=1 ttl=64 time=0.167 ms
@@ -352,11 +352,121 @@ PC2> ping 10.2.3.1
 host (10.2.3.1) not reachable
 ```
 
-Vérifier que `PC1` ne peut joindre personne alors qu'il est dans le même réseau.
+🌞 Vérifier que `PC1` ne peut joindre personne alors qu'il est dans le même réseau
 ```
 PC1> ping 10.2.3.2
 host (10.2.3.2) not reachable
 
 PC1> ping 10.2.3.3
 host (10.2.3.3) not reachable
+```
+
+## 2. Avec trunk
+
+#### Topologie
+
+```
++-----+        +-------+        +-------+        +-----+
+| PC1 +--------+  SW1  +--------+  SW2  +--------+ PC4 |
++-----+      10+-------+        +-------+20      +-----+
+                 20|              10|
+                   |                |
+                +--+--+          +--+--+
+                | PC2 |          | PC3 |
+                +-----+          +-----+
+```
+
+#### Plan d'adressage
+
+Machine | IP `net1` | IP `net2` | VLAN
+--- | --- | --- | ---
+`PC1` | `10.2.10.1/24` | X | 10
+`PC2` | X | `10.2.20.1/24` | 20
+`PC3` | `10.2.10.2/24` | X | 10
+`PC4` | X | `10.2.20.2/24` | 20
+
+🌞 Mise en place la topologie ci-dessus
+```
+PC1> ip 10.2.10.1/24
+PC2> ip 10.2.20.1/24
+PC3> ip 10.2.10.2/24
+PC4> ip 10.2.20.2/24
+```
+```
+IOU1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+IOU1(config)#vlan 10
+IOU1(config-vlan)#name pc1-iou
+IOU1(config-vlan)#exit
+IOU1(config)#vlan 20
+IOU1(config-vlan)#name pc2-iou
+IOU1(config-vlan)#exit
+IOU1(config)#interface Ethernet 0/1
+IOU1(config-if)#switchport mode access
+IOU1(config-if)#switchport access vlan 10
+IOU1(config-if)#exit
+IOU1(config)#interface Ethernet 0/2
+IOU1(config-if)#switchport mode access
+IOU1(config-if)#switchport access vlan 20
+IOU1(config-if)#exit
+IOU1(config)#interface Ethernet 0/0
+IOU1(config-if)#switchport trunk encapsulation dot1q
+IOU1(config-if)#switchport mode trunk
+IOU1(config-if)#switchport trunk allowed vlan 10,20
+IOU1(config-if)#exit
+```
+```
+IOU2#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+IOU2(config)#vlan 10
+IOU2(config-vlan)#name pc3-iou
+IOU2(config-vlan)#exit
+IOU2(config)#vlan 20
+IOU2(config-vlan)#name pc4-iou
+IOU2(config-vlan)#exit
+IOU2(config)#interface Ethernet 0/1
+IOU2(config-if)#switchport mode access
+IOU2(config-if)#switchport access vlan 10
+IOU2(config-if)#exit
+IOU2(config)#interface Ethernet 0/2
+IOU2(config-if)#switchport mode access
+IOU2(config-if)#switchport access vlan 20
+IOU2(config-if)#exit
+IOU2(config)#interface Ethernet 0/0
+IOU2(config-if)#switchport trunk encapsulation dot1q
+IOU2(config-if)#switchport mode trunk
+IOU2(config-if)#switchport trunk allowed vlan 10,20
+IOU2(config-if)#exit
+```
+
+🌞 Vérifier que PC1 ne peut joindre que PC3
+```
+PC1> ping 10.2.10.2
+84 bytes from 10.2.10.2 icmp_seq=1 ttl=64 time=0.367 ms
+84 bytes from 10.2.10.2 icmp_seq=2 ttl=64 time=0.401 ms
+84 bytes from 10.2.10.2 icmp_seq=3 ttl=64 time=0.420 ms
+84 bytes from 10.2.10.2 icmp_seq=4 ttl=64 time=0.508 ms
+84 bytes from 10.2.10.2 icmp_seq=5 ttl=64 time=0.405 ms
+
+PC1> ping 10.2.20.1
+No gateway found
+
+PC1> ping 10.2.20.2
+No gateway found
+```
+
+🌞 Vérifier que PC4 ne peut joindre que PC2
+```
+PC4> ping 10.2.20.1
+84 bytes from 10.2.20.1 icmp_seq=1 ttl=64 time=0.283 ms
+84 bytes from 10.2.20.1 icmp_seq=2 ttl=64 time=1.462 ms
+84 bytes from 10.2.20.1 icmp_seq=3 ttl=64 time=0.390 ms
+84 bytes from 10.2.20.1 icmp_seq=4 ttl=64 time=0.369 ms
+84 bytes from 10.2.20.1 icmp_seq=5 ttl=64 time=0.433 ms
+
+PC4> ping 10.2.10.1
+No gateway found
+
+PC4> ping 10.2.10.2
+No gateway found
 ```
