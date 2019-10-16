@@ -30,13 +30,13 @@
 # Intro
 # 1. Simplest setup
 
-####Topologie
+#### Topologie
 ```
 +-----+        +-------+        +-----+
 | PC1 +--------+  IOU1 +--------+ PC2 |
 +-----+        +-------+        +-----+
 ```
-####Plan d'adressage
+#### Plan d'adressage
 
 Machine | `net1`
 --- | ---
@@ -83,7 +83,7 @@ Pour les captures Wireshark j'ai lancé la capture entre le **PC1** et IOU1 et s
 
 # II. More switches
 
-####Topologie
+#### Topologie
 ```
                         +-----+
                         | PC2 |
@@ -99,7 +99,7 @@ Pour les captures Wireshark j'ai lancé la capture entre le **PC1** et IOU1 et s
 | PC1 +--------+  SW1  +--------+  SW3  +--------+ PC3 |
 +-----+        +-------+        +-------+        +-----+
 ```
-####Plan d'adressage
+#### Plan d'adressage
 
 Machine | `net1`
 --- | ---
@@ -268,3 +268,95 @@ Et1/2               Desg FWD 100       128.7    Shr
 ```
 On remarque sur la console de L'IOU1 qu'il y a une ligne supplémentaire avec écrit ``This root is a bridge``
 
+# III. Isolation
+
+## 1. Simple
+ 
+#### Topologie
+```
++-----+        +-------+        +-----+
+| PC1 +--------+  SW1  +--------+ PC3 |
++-----+      10+-------+20      +-----+
+                 20|
+                   |
+                +--+--+
+                | PC2 |
+                +-----+
+```
+
+#### Plan d'adressage
+
+Machine | IP `net1` | VLAN
+--- | --- | --- 
+`PC1` | `10.2.3.1/24` | 10
+`PC2` | `10.2.3.2/24` | 20
+`PC3` | `10.2.3.3/24` | 20
+
+Mise en place la topologie ci-dessus.
+```
+PC1> ip 10.2.3.1/24
+PC2> ip 10.2.3.2/24
+PC3> ip 10.2.3.3/24
+```
+
+```
+IOU1#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+IOU1(config)#vlan 10
+IOU1(config-vlan)#name pc1-iou
+IOU1(config-vlan)#exit
+IOU1(config)#interface Ethernet 0/0
+IOU1(config-if)#switchport mode access
+IOU1(config-if)#switchport access vlan 10
+IOU1(config-if)#exit
+IOU1(config)#vlan 20
+IOU1(config-vlan)# name pc2-iou-pc3
+IOU1(config-vlan)#exit
+IOU1(config)#interface Ethernet 0/1
+IOU1(config-if)#switchport mode access
+IOU1(config-if)#switchport access vlan 20
+IOU1(config-if)#exit
+IOU1(config)#interface Ethernet 0/2
+IOU1(config-if)#switchport mode access
+IOU1(config-if)#switchport access vlan 20
+IOU1(config-if)#exit
+```
+
+```
+IOU1#show vlan br
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/3, Et1/0, Et1/1, Et1/2
+                                                Et1/3, Et2/0, Et2/1, Et2/2
+                                                Et2/3, Et3/0, Et3/1, Et3/2
+                                                Et3/3
+10   pc1-iou                          active    Et0/0
+20   pc2-iou-pc3                      active    Et0/1, Et0/2
+1002 fddi-default                     act/unsup
+1003 token-ring-default               act/unsup
+1004 fddinet-default                  act/unsup
+1005 trnet-default                    act/unsup
+```
+
+Vérifier que `PC2` ne peut joindre que `PC3`.
+```
+PC2> ping 10.2.3.3
+84 bytes from 10.2.3.3 icmp_seq=1 ttl=64 time=0.167 ms
+84 bytes from 10.2.3.3 icmp_seq=2 ttl=64 time=0.277 ms
+84 bytes from 10.2.3.3 icmp_seq=3 ttl=64 time=0.279 ms
+84 bytes from 10.2.3.3 icmp_seq=4 ttl=64 time=0.314 ms
+84 bytes from 10.2.3.3 icmp_seq=5 ttl=64 time=0.270 ms
+
+PC2> ping 10.2.3.1
+host (10.2.3.1) not reachable
+```
+
+Vérifier que `PC1` ne peut joindre personne alors qu'il est dans le même réseau.
+```
+PC1> ping 10.2.3.2
+host (10.2.3.2) not reachable
+
+PC1> ping 10.2.3.3
+host (10.2.3.3) not reachable
+```
